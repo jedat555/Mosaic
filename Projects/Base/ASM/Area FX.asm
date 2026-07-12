@@ -35,8 +35,8 @@ org $89ABF8
   ;LDA $000F,X
 
 ; Adjust priority of layer 3 tiles
-org $89AC31
-  JSR GetFxTilemapPointer
+org $89AC2B
+  JSR GetFxTilemapIndex
 
 ; use surface new to set max height for lightning with rain fx
 org $8DEC59
@@ -248,23 +248,25 @@ GetFxPaletteBlend_Remove:
   LDA #$0000
   RTS
 
-GetFxTilemapPointer:
+GetFxTilemapIndex:
+  STA $196E ; fx type index
+  BEQ GetFxTilemapIndex_Exit
+  CMP #$0005
+  BPL GetFxTilemapIndex_Exit
+  TAY
   LDA $1984
   CMP #$001C
-  BNE GetFxTilemapPointer_Default
-  CPY #$0004 ; Acid
-  BEQ GetFxTilemapPointer_Acid
-  CPY #$0002 ; Lava
-  BEQ GetFxTilemapPointer_Lava
-GetFxTilemapPointer_Default:
-  LDA $ABF0,Y
+  BNE +
+  CLC
+  ADC $196E
   RTS
-GetFxTilemapPointer_Acid:
-  LDA.w #AcidTilemap_v2
++
+  LDA $196E
+GetFxTilemapIndex_Exit:
   RTS
-GetFxTilemapPointer_Lava:
-  LDA.w #LavaTilemap_v2
-  RTS
+
+org $83AC0E
+  DW LavaTilemap_v2, AcidTilemap_v2
 
 ; swap some tileset indexes based on asleep/off
 org $82DEFD
