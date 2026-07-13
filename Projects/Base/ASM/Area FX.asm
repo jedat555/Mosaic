@@ -442,11 +442,14 @@ FirefliesInit:
   CMP #$0020
   BPL +
   JSL CheckTileset
-  TAX
-  LDA.l FirefliesDarknessSet,X
+  CMP #$0003*2
+  BEQ +
+  CMP #$0005*2
+  BEQ +
+  LDA #Fireflies_Dark_
   RTL
 +
-  LDA #Fireflies_Dark_
+  LDA #Fireflies_Light
   RTL
 
 FirefliesDarkness:
@@ -458,18 +461,6 @@ FirefliesDarkness:
   PLA
   CLC
   RTL
-
-FirefliesDarknessSet:
-  DW Fireflies_Dark_, Fireflies_Dark_ ;Crateria Surface
-  DW Fireflies_Dark_, Fireflies_Light ;Inner Crateria
-  DW Fireflies_Dark_, Fireflies_Light ;Wrecked Ship
-  DW Fireflies_Dark_, Fireflies_Dark_ ;Brinstar
-  DW Fireflies_Dark_ ;Tourian Statues Access/Blue brinstar
-  DW Fireflies_Dark_, Fireflies_Dark_ ;Norfair
-  DW Fireflies_Dark_, Fireflies_Dark_ ;Maridia
-  DW Fireflies_Dark_, Fireflies_Dark_ ;Tourian
-  DW Fireflies_Dark_, Fireflies_Dark_, Fireflies_Dark_, Fireflies_Dark_, Fireflies_Dark_, Fireflies_Dark_ ;Ceres
-  DW Fireflies_Dark_, Fireflies_Dark_, Fireflies_Dark_, Fireflies_Dark_, Fireflies_Dark_ ;Utility Rooms
 
 Fireflies_Dark_:
   DW $0000, $0600, $0C00, $1200, $1800, $1900
