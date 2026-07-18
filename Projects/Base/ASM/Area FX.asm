@@ -35,8 +35,8 @@ org $89ABF8
   ;LDA $000F,X
 
 ; Adjust priority of layer 3 tiles
-org $89AC31
-  JSR GetFxTilemapPointer
+org $89AC2B
+  JSR GetFxTilemapIndex
 
 ; use surface new to set max height for lightning with rain fx
 org $8DEC59
@@ -248,23 +248,25 @@ GetFxPaletteBlend_Remove:
   LDA #$0000
   RTS
 
-GetFxTilemapPointer:
+GetFxTilemapIndex:
+  STA $196E ; fx type index
+  BEQ GetFxTilemapIndex_Exit
+  CMP #$0005
+  BPL GetFxTilemapIndex_Exit
+  TAY
   LDA $1984
   CMP #$001C
-  BNE GetFxTilemapPointer_Default
-  CPY #$0004 ; Acid
-  BEQ GetFxTilemapPointer_Acid
-  CPY #$0002 ; Lava
-  BEQ GetFxTilemapPointer_Lava
-GetFxTilemapPointer_Default:
-  LDA $ABF0,Y
+  BNE +
+  CLC
+  ADC $196E
   RTS
-GetFxTilemapPointer_Acid:
-  LDA.w #AcidTilemap_v2
++
+  LDA $196E
+GetFxTilemapIndex_Exit:
   RTS
-GetFxTilemapPointer_Lava:
-  LDA.w #LavaTilemap_v2
-  RTS
+
+org $83AC0E
+  DW LavaTilemap_v2, AcidTilemap_v2
 
 ; swap some tileset indexes based on asleep/off
 org $82DEFD
@@ -440,11 +442,14 @@ FirefliesInit:
   CMP #$0020
   BPL +
   JSL CheckTileset
-  TAX
-  LDA.l FirefliesDarknessSet,X
+  CMP #$0003*2
+  BEQ +
+  CMP #$0005*2
+  BEQ +
+  LDA #Fireflies_Dark_
   RTL
 +
-  LDA #Fireflies_Dark_
+  LDA #Fireflies_Light
   RTL
 
 FirefliesDarkness:
@@ -456,18 +461,6 @@ FirefliesDarkness:
   PLA
   CLC
   RTL
-
-FirefliesDarknessSet:
-  DW Fireflies_Dark_, Fireflies_Dark_ ;Crateria Surface
-  DW Fireflies_Dark_, Fireflies_Light ;Inner Crateria
-  DW Fireflies_Dark_, Fireflies_Light ;Wrecked Ship
-  DW Fireflies_Dark_, Fireflies_Dark_ ;Brinstar
-  DW Fireflies_Dark_ ;Tourian Statues Access/Blue brinstar
-  DW Fireflies_Dark_, Fireflies_Dark_ ;Norfair
-  DW Fireflies_Dark_, Fireflies_Dark_ ;Maridia
-  DW Fireflies_Dark_, Fireflies_Dark_ ;Tourian
-  DW Fireflies_Dark_, Fireflies_Dark_, Fireflies_Dark_, Fireflies_Dark_, Fireflies_Dark_, Fireflies_Dark_ ;Ceres
-  DW Fireflies_Dark_, Fireflies_Dark_, Fireflies_Dark_, Fireflies_Dark_, Fireflies_Dark_ ;Utility Rooms
 
 Fireflies_Dark_:
   DW $0000, $0600, $0C00, $1200, $1800, $1900
